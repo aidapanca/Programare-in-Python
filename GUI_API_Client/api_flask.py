@@ -68,6 +68,10 @@ def returneaza_toate_datele():
         "istoric_date": lista_de_date_stocate
     })
 
+def sterge_toate_datele():
+    lista_de_date_stocate.clear()
+    return jsonify({"mesaj": "Toate datele au fost sterse cu succes!"}), 200
+
 @app.route('/')
 def pagina_principala():
     return jsonify({
@@ -93,6 +97,10 @@ def pagina_principala():
 @app.route('/date', methods=['GET'])
 def ruta_get_date():
     return returneaza_toate_datele()
+
+@app.route('/date', methods=['DELETE'])
+def ruta_delete_date():
+    return sterge_toate_datele()
 
 if __name__ == '__main__':
     app.run(debug=True)
