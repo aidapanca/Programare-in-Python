@@ -61,6 +61,13 @@ def proceseaza_payload_in_functie_de_tip(cerere):
     else:
         return None, f"EROARE: Tip de date necunoscut {tip_date_input}"
 
+#returnez toate datele stocate, sub forma de JSON
+def returneaza_toate_datele():
+    return jsonify({
+        "mesaj": "Cerere GET realizata cu succes!",
+        "istoric_date": lista_de_date_stocate
+    })
+
 @app.route('/')
 def pagina_principala():
     return jsonify({
@@ -82,6 +89,10 @@ def pagina_principala():
             "DELETE /date": "Sterge toate datele"
         }
     })
+
+@app.route('/date', methods=['GET'])
+def ruta_get_date():
+    return returneaza_toate_datele()
 
 if __name__ == '__main__':
     app.run(debug=True)
