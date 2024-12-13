@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 
 CULOARE_FUNDAL = "#282c34"
 CULOARE_FUNDAL_INPUT = "#3c3f41"
