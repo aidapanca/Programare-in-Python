@@ -68,6 +68,14 @@ def returneaza_toate_datele():
         "istoric_date": lista_de_date_stocate
     })
 
+def adauga_date_noi(date_primite):
+    for resursa in lista_de_date_stocate:
+        if resursa["date"].get("cheie") == date_primite.get("cheie"):
+            return jsonify({"mesaj": f"Cheia '{date_primite['cheie']}' exista deja, alegeti alta cheie!"}), 400
+
+    lista_de_date_stocate.append({"metoda": "POST", "date": date_primite})
+    return jsonify({"mesaj": "Date adaugate cu succes!", "date_adaugate": date_primite}), 201
+
 def sterge_toate_datele():
     lista_de_date_stocate.clear()
     return jsonify({"mesaj": "Toate datele au fost sterse cu succes!"}), 200
@@ -97,6 +105,19 @@ def pagina_principala():
 @app.route('/date', methods=['GET'])
 def ruta_get_date():
     return returneaza_toate_datele()
+
+@app.route('/date', methods=['POST'])
+def ruta_post_date():
+    date_primite, eroare = proceseaza_payload_in_functie_de_tip(request)
+    if eroare:
+        return jsonify({"mesaj": eroare}), 400
+    if not date_primite:
+        return jsonify({"mesaj": "EROARE: pentru POST, payload-ul este obligatoriu!!"}), 400
+
+    if "cheie" not in date_primite:
+        return jsonify({"mesaj": "EROARE: Trebuie introdus campul 'cheie' in payload!!"}), 400
+
+    return adauga_date_noi(date_primite)
 
 @app.route('/date', methods=['DELETE'])
 def ruta_delete_date():
