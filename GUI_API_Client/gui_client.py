@@ -63,3 +63,48 @@ def construieste_header_pentru_format(tip_format):
         return {"Content-Type": "text/plain"}
     else:
         raise ValueError(f"Format necunoscut: {tip_format}")
+
+def trimite_cerere_get(adresa_url, antet):
+    return requests.get(adresa_url, headers=antet)
+
+def trimite_cerere_post(adresa_url, antet, payload):
+    if antet.get("Content-Type") == TIPURI_CONTINUT["json"]:
+        return requests.post(adresa_url, headers=antet, json=payload)
+    else:
+        return requests.post(adresa_url, headers=antet, data=payload)
+
+def trimite_cerere_put(adresa_url, antet, payload):
+    if antet.get("Content-Type") == TIPURI_CONTINUT["json"]:
+        return requests.put(adresa_url, headers=antet, json=payload)
+    else:
+        return requests.put(adresa_url, headers=antet, data=payload)
+
+def trimite_cerere_delete(adresa_url, antet):
+    return requests.delete(adresa_url, headers=antet)
+
+def trimite_cerere_la_server(metoda_http, adresa_url, antet, payload):
+    try:
+        if metoda_http == "GET":
+            raspuns = trimite_cerere_get(adresa_url, antet)
+            print(f"Raspuns GET: {raspuns.status_code}, {raspuns.text}")
+            return None, raspuns
+        elif metoda_http == "DELETE":
+            raspuns = trimite_cerere_delete(adresa_url, antet)
+            print(f"Raspuns DELETE: {raspuns.status_code}, {raspuns.text}")
+            return None, raspuns
+        elif metoda_http == "POST":
+            if not payload:
+                return "EROARE: Pentru POST, payload-ul este obligatoriu!!", None
+            raspuns = trimite_cerere_post(adresa_url, antet, payload)
+            print(f"Raspuns POST: {raspuns.status_code}, {raspuns.text}")
+            return None, raspuns
+        elif metoda_http == "PUT":
+            if not payload:
+                return "EROARE: Pentru PUT, payload-ul este obligatoriu!!", None
+            raspuns = trimite_cerere_put(adresa_url, antet, payload)
+            print(f"Raspuns PUT: {raspuns.status_code}, {raspuns.text}")
+            return None, raspuns
+        else:
+            return "EROARE: Metoda HTTP NU este valida!!", None
+    except requests.exceptions.RequestException as e:
+        return f"EROARE la trimiterea cererii: {str(e)}", None
