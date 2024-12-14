@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from gui_client import incarca_istoric_din_fisier
 
 CULOARE_FUNDAL = "#282c34"
 CULOARE_FUNDAL_INPUT = "#3c3f41"
@@ -34,6 +35,39 @@ def creeaza_buton_trimite(sectiune, comanda):
     buton = tk.Button(sectiune, text="TRIMITE", command=comanda, bg=CULOARE_BUTON, fg=CULOARE_TEXT, font=("Verdana", 10, "bold"))
     buton.grid(row=0, column=2, rowspan=4, padx=10, pady=10, sticky="nsew")
     return buton
+
+def incarca_istoric_in_interfata():
+    global istoric_cereri
+    cereri = incarca_istoric_din_fisier()
+    if cereri:
+        istoric_cereri = cereri
+        for cerere in cereri:
+            intrare_istoric = f"{cerere['method']} {cerere['url']} -> {cerere['status_code']}"
+            lista_istoric.insert(tk.END, intrare_istoric)
+    else:
+        istoric_cereri = []
+
+def vizualizeaza_raspuns_istoric():
+    #fct apelata cand utilizatorul vrea sa vada raspunsul unei cereri din istoric
+    sel = lista_istoric.curselection()
+    if not sel:
+        messagebox.showinfo("Info", "Trebuie sa selectezi o cerere din istoric!")
+        return
+    index = sel[0]
+    cerere = istoric_cereri[index]
+    #afisez raspunsul in zona de raspuns
+    zona_raspuns.delete(1.0, tk.END)
+
+    #verific statusul
+    cod_status = cerere['status_code']
+    if cod_status is None or (isinstance(cod_status, int) and cod_status >= 400):
+        #eroare sau cod status mare, pun fundal rosu
+        zona_raspuns.configure(bg="#8B0000")
+    else:
+        #cerere de succes
+        zona_raspuns.configure(bg="#006400")
+
+    zona_raspuns.insert(tk.END, f"STATUS: {cod_status}\n{cerere['response_text']}\n")
 
 def main():
     global optiune_metoda, camp_url, format_var, camp_payload, lista_istoric, zona_raspuns, selector_format_headers

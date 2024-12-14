@@ -29,6 +29,18 @@ def verifica_accesibilitate_url(adresa_url):
     except requests.RequestException:
         return False
 
+#salvez istoricul cererilor intr un fisier JSON
+def scrie_istoric_in_fisier(lista_istoric, nume_fisier="istoric.json"):
+    with open(nume_fisier, "w") as fisier:
+        json.dump(lista_istoric, fisier)
+
+def incarca_istoric_din_fisier(nume_fisier="istoric.json"):
+    try:
+        with open(nume_fisier, "r") as fisier:
+            return json.load(fisier)
+    except FileNotFoundError:
+        return []
+
 def proceseaza_antet_json(antet):
     try:
         return json.loads(antet) if antet else {}
