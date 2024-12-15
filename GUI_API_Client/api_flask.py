@@ -8,8 +8,10 @@ TIP_DATE_TEXT_SIMPLU = 'text/plain'
 
 app = Flask(__name__)
 
+#simulez o baza de date, ca sa stochez aici datele primite
 lista_de_date_stocate = []
 
+#obtin datele din cerere ca JSON
 def proceseaza_date_json(cerere):
     try:
         date_json = cerere.get_json()
@@ -19,6 +21,7 @@ def proceseaza_date_json(cerere):
     except Exception as eroare:
         return None, f"EROARE la parsarea JSON: {str(eroare)}"
 
+#parsez payload ul ca XML, extrag elementele si le pun intr un dictionar
 def proceseaza_date_xml(cerere):
     try:
         radacina = ET.fromstring(cerere.data.decode('utf-8'))
@@ -31,10 +34,11 @@ def proceseaza_date_xml(cerere):
     except ET.ParseError as eroare_xml:
         return None, f"EROARE la parsarea XML: {str(eroare_xml)}"
 
+#parsez datele trimise ca text simplu (o sa aiba forma "cheie=123, nume=Aida")
 def proceseaza_date_text_simplu(cerere):
     try:
         text_brut = cerere.data.decode('utf-8').strip()
-        parti = text_brut.split(',')
+        parti = text_brut.split(',') #impart dupa virgula si apoi fiecare pereche dupa =
         date_text = {}
         for p in parti:
             p_curat = p.strip()
@@ -49,6 +53,7 @@ def proceseaza_date_text_simplu(cerere):
     except Exception as e:
         return None, f"EROARE la procesarea textului: {str(e)}"
 
+#determin tipul de date primite si apelez functiile corespunzatoare
 def proceseaza_payload_in_functie_de_tip(cerere):
     tip_date_input = cerere.headers.get('Content-Type', '').lower()
 
@@ -90,10 +95,12 @@ def actualizeaza_sau_creeaza(date_primite):
         lista_de_date_stocate.append({"metoda": "PUT", "date": date_primite})
         return jsonify({"mesaj": "Cheia nu exista, resursa noua a fost creata!", "date_adaugate": date_primite}), 201
 
+#sterg toate datele din lista
 def sterge_toate_datele():
     lista_de_date_stocate.clear()
     return jsonify({"mesaj": "Toate datele au fost sterse cu succes!"}), 200
 
+#rutele API
 @app.route('/')
 def pagina_principala():
     return jsonify({
@@ -131,6 +138,7 @@ def ruta_post_date():
     if "cheie" not in date_primite:
         return jsonify({"mesaj": "EROARE: Trebuie introdus campul 'cheie' in payload!!"}), 400
 
+    #verific cheie unica (fac in functie)
     return adauga_date_noi(date_primite)
 
 @app.route('/date', methods=['PUT'])

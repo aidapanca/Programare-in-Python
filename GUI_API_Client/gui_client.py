@@ -64,6 +64,7 @@ def valideaza_payload_in_functie_de_tip(payload, tip_continut):
         except ET.ParseError:
             raise ValueError("Payload XML NU este valid!!")
     else:
+        #daca nu e JSON sau XML, consider ca e text simplu
         return payload.strip()
 
 def construieste_header_pentru_format(tip_format):

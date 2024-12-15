@@ -32,6 +32,29 @@ def creeaza_sectiune_raspuns(fereastra):
     zona.pack(fill=tk.BOTH, expand=True)
     return sectiune, zona
 
+def creeaza_sectiune_istoric(fereastra):
+    sectiune = tk.LabelFrame(fereastra, text="ISTORIC", bg=CULOARE_FUNDAL, fg=CULOARE_TEXT, font=FONT_TITLU)
+    sectiune.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+
+    frame_lista = tk.Frame(sectiune, bg=CULOARE_FUNDAL)
+    frame_lista.pack(fill=tk.BOTH, expand=True)
+
+    lista = tk.Listbox(frame_lista, width=80, height=8, bg=CULOARE_FUNDAL_INPUT, fg=CULOARE_TEXT, font=FONT_CONTINUT)
+    lista.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    scrollbar = tk.Scrollbar(frame_lista)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    lista.config(yscrollcommand=scrollbar.set)
+    scrollbar.config(command=lista.yview)
+
+    frame_buton = tk.Frame(sectiune, bg=CULOARE_FUNDAL)
+    frame_buton.pack(fill=tk.X)
+
+    buton_vizualizeaza = tk.Button(frame_buton, text="VEZI RASPUNS ISTORIC", command=vizualizeaza_raspuns_istoric, bg=CULOARE_BUTON, fg=CULOARE_TEXT)
+    buton_vizualizeaza.pack(pady=5, anchor="e")
+
+    return sectiune, lista
+
 def creeaza_buton_trimite(sectiune, comanda):
     buton = tk.Button(sectiune, text="TRIMITE", command=comanda, bg=CULOARE_BUTON, fg=CULOARE_TEXT, font=("Verdana", 10, "bold"))
     buton.grid(row=0, column=2, rowspan=4, padx=10, pady=10, sticky="nsew")
@@ -141,6 +164,7 @@ def main():
     creeaza_buton_trimite(sectiune_cerere, gestioneaza_cerere)
 
     _, zona_raspuns = creeaza_sectiune_raspuns(fereastra)
+    _, lista_istoric = creeaza_sectiune_istoric(fereastra)
     incarca_istoric_in_interfata()
 
     fereastra.mainloop()
