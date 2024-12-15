@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from gui_client import incarca_istoric_din_fisier
+from gui_client import incarca_istoric_din_fisier, trimite_cerere_la_server
+import json
 
 CULOARE_FUNDAL = "#282c34"
 CULOARE_FUNDAL_INPUT = "#3c3f41"
@@ -69,6 +70,51 @@ def vizualizeaza_raspuns_istoric():
 
     zona_raspuns.insert(tk.END, f"STATUS: {cod_status}\n{cerere['response_text']}\n")
 
+def construieste_header(tip_format):
+    if tip_format == "JSON":
+        return {"Content-Type": "application/json"}
+    elif tip_format == "XML":
+        return {"Content-Type": "application/xml"}
+    return {"Content-Type": "text/plain"}
+
+def gestioneaza_cerere():
+    metoda_http = optiune_metoda.get()
+    adresa_url = camp_url.get()
+    tip_format = format_var.get()
+    payload = camp_payload.get()
+
+    zona_raspuns.delete(1.0, tk.END)
+
+    header = construieste_header(tip_format)
+
+    mesaj_eroare, raspuns = trimite_cerere_la_server(metoda_http, adresa_url, header, payload)
+
+    if mesaj_eroare:
+        zona_raspuns.configure(bg="#8B0000")
+        zona_raspuns.insert(tk.END, f"EROARE: {mesaj_eroare}\n")
+    elif raspuns:
+        if raspuns.status_code >= 400:
+            zona_raspuns.configure(bg="#8B0000")
+            try:
+                eroare_mesaj = raspuns.json().get("mesaj", "EROARE")
+                zona_raspuns.insert(tk.END, f"STATUS: {raspuns.status_code} {raspuns.reason}\nMESAJ: {eroare_mesaj}\n")
+            except Exception:
+                zona_raspuns.insert(tk.END, f"STATUS: {raspuns.status_code} {raspuns.reason}\n{raspuns.text}\n")
+        else:
+            zona_raspuns.configure(bg="#006400")
+            try:
+                if "application/json" in raspuns.headers.get("Content-Type", ""):
+                    raspuns_text = json.dumps(raspuns.json(), indent=2)
+                else:
+                    raspuns_text = raspuns.text
+                zona_raspuns.insert(tk.END, f"STATUS: {raspuns.status_code} {raspuns.reason}\n{raspuns_text}\n")
+            except Exception:
+                zona_raspuns.insert(tk.END, f"STATUS: {raspuns.status_code} {raspuns.reason}\n{raspuns.text}\n")
+    else:
+        zona_raspuns.configure(bg="#8B0000")
+        zona_raspuns.insert(tk.END, "EROARE\n")
+
+
 def main():
     global optiune_metoda, camp_url, format_var, camp_payload, lista_istoric, zona_raspuns, selector_format_headers
 
@@ -92,9 +138,10 @@ def main():
     camp_payload = tk.Entry(sectiune_cerere, width=60)
     camp_payload.grid(row=3, column=1, padx=10, pady=5, sticky="w")
 
-    creeaza_buton_trimite(sectiune_cerere, None)
+    creeaza_buton_trimite(sectiune_cerere, gestioneaza_cerere)
 
     _, zona_raspuns = creeaza_sectiune_raspuns(fereastra)
+    incarca_istoric_in_interfata()
 
     fereastra.mainloop()
 
